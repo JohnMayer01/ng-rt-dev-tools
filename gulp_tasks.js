@@ -2,7 +2,7 @@
  * Common gulp tasks for
  *  + build
  *    - browserify shared code for UI
- *    - build pure UI code
+ *    - build pure client code
  *    - distribution package build
  *  + run mocha tests
  *  + run eslint
@@ -19,14 +19,14 @@ module.exports = (gulp, options) => {
     gulp = require("gulp");
 
   options = _.extend({
-    name: path.basename(path.dirname(module.parent.filename)),
-    baseDir: path.dirname(module.parent.filename),
+    name: path.basename(path.dirname(module.parent.parent.filename)),
+    baseDir: path.dirname(module.parent.parent.filename),
     browserify: {},
     vulcanize: {}
   }, options);
 
   const sharedDir = path.join(options.baseDir, 'shared');
-  const uiDir = path.join(options.baseDir, 'ui');
+  const uiDir = path.join(options.baseDir, 'client');
   const uiPublicDir = path.join(uiDir, 'public');
 
 
@@ -39,7 +39,7 @@ module.exports = (gulp, options) => {
   const watchify = require('watchify');
   const babel = require('babelify');
 
-  // functions for build
+  /*
   function compileShared(watch) {
     var bundler = watchify(browserify(path.join(sharedDir, 'index.js'), {
       debug: true,
@@ -69,18 +69,34 @@ module.exports = (gulp, options) => {
     rebundle();
   }
 
-  gulp.task('buildShared', function () {
-    return compileShared();
-  });
-
   gulp.task('watchShared', function () {
     return compileShared(true);
   });
+  */
+
+  gulp.task('buildShared', function () {
+    browserify(path.join(sharedDir, 'index.js'), {
+      debug: true,
+      noParse: options.browserify.noParse || []
+    })
+      .transform(babel)
+      .bundle()
+      .pipe(source('build.js'))
+      .pipe(buffer())
+      .pipe(sourcemaps.init({loadMaps: true}))
+      .pipe(sourcemaps.write('./'))
+      .pipe(gulp.dest(uiPublicDir));
+  });
 
 
-  // Build UI
+  // Build client code (UI)
+  var vulcanize = require('gulp-vulcanize');
+  var less = require('gulp-less');
+  var concat = require('gulp-concat');
+  var cleanCSS = require('gulp-clean-css');
+  var rename = require('gulp-rename');
 
-  gulp.task('cleanUi', () =>
+  gulp.task('cleanClient', () =>
     del([uiPublicDir])
   );
 
@@ -112,7 +128,7 @@ module.exports = (gulp, options) => {
         inlineCss: true,
         implicitStrip: true,
         stripComments: true,
-        excludes: options.vulcanize.excludes || [],
+        excludes: Array.concat(['build.js'], options.vulcanize.excludes || []),
         stripExcludes: false,
         strip: true
       }))
@@ -123,9 +139,9 @@ module.exports = (gulp, options) => {
       ;
   });
 
-  gulp.task('customBuildUi');
+  gulp.task('customBuildClient');
 
-  gulp.task('buildUi', ['cleanUi', 'buildShared', 'vulcanize', 'copyRes', 'customBuildUi']);
+  gulp.task('buildClient', ['cleanClient', 'buildShared', 'vulcanize', 'copyRes', 'customBuildClient']);
 
 
   // Build distribution
@@ -137,7 +153,7 @@ module.exports = (gulp, options) => {
   );
 
   gulp.task('copyToDist', ['cleanDist'], () =>
-    gulp.src(['server/**/*', 'ui/**/*', 'shared/**/*', 'config/**/*', '*.json', '*.md', '*.js'], {base: options.baseDir})
+    gulp.src(['server/**/*', 'client/**/*', 'shared/**/*', 'config/**/*', '*.json', '*.md', '*.js'], {base: options.baseDir})
       .pipe(gulp.dest(distDir))
   );
 
@@ -147,8 +163,8 @@ module.exports = (gulp, options) => {
       .pipe(gulp.dest(distDir));
   });
 
-  gulp.task('clean', ['cleanDist', 'cleanUi']);
-  gulp.task('dist', ['clean', 'buildUi', 'zip']);
+  gulp.task('clean', ['cleanDist', 'cleanClient']);
+  gulp.task('dist', ['clean', 'buildClient', 'zip']);
 
   // by default, it creates zip package for distribution
   gulp.task('default', ['dist']);
@@ -183,7 +199,7 @@ module.exports = (gulp, options) => {
   };
 
   defineMochaTask('test.server', 'test/server/**/*_test.js', serverOptions);
-  defineMochaTask('test.ui', 'test/ui/**/*_test.js', uiOptions);
+  defineMochaTask('test.ui', 'test/client/**/*_test.js', uiOptions);
 
 
   // ESLint run
