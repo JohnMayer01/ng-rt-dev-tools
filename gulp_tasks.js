@@ -39,11 +39,6 @@ module.exports = (gulp, options) => {
   const watchify = require('watchify');
   const babel = require('babelify');
 
-  /*
-   [
-   require.resolve('ed25519')
-   ]
-   */
   // functions for build
   function compileShared(watch) {
     var bundler = watchify(browserify(path.join(sharedDir, 'index.js'), {
@@ -109,9 +104,6 @@ module.exports = (gulp, options) => {
       .pipe(gulp.dest(path.join(uiDir, 'styles')));
   });
 
-  /*
-   ['bs58.js', 'keys.js']
-   */
   gulp.task('vulcanize', ['less'], function() {
     return gulp.src(path.join(uiDir, 'index.html'))
       .pipe(vulcanize({
@@ -125,7 +117,6 @@ module.exports = (gulp, options) => {
         strip: true
       }))
       .on("error", function(err) {
-        // TODO: avoid console.log()
         console.log("gulp error: " + err);
       })
       .pipe(gulp.dest(uiPublicDir))
