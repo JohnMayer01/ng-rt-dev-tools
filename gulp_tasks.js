@@ -1,11 +1,11 @@
 /**
  * Common gulp tasks for
- *  run eslint
- *  build the plugin
- *    UI
- *    server
- *    common (server & UI)
- *  run mocha tests
+ *  + build
+ *    - browserify shared code for UI
+ *    - build pure UI code
+ *    - distribution package build
+ *  + run mocha tests
+ *  + run eslint
  */
 'use strict';
 const path = require('path');
@@ -21,16 +21,17 @@ module.exports = (gulp, options) => {
   options = _.extend({
     name: path.basename(path.dirname(module.parent.filename)),
     baseDir: path.dirname(module.parent.filename),
-    browserify: {}
+    browserify: {},
+    vulcanize: {}
   }, options);
 
+  const sharedDir = path.join(options.baseDir, 'shared');
   const uiDir = path.join(options.baseDir, 'ui');
   const uiPublicDir = path.join(uiDir, 'public');
 
 
-  // Common (server & UI) building
+  // Browserify shared (server & UI) code
 
-  // modules for build
   const sourcemaps = require('gulp-sourcemaps');
   const source = require('vinyl-source-stream');
   const buffer = require('vinyl-buffer');
@@ -44,8 +45,8 @@ module.exports = (gulp, options) => {
    ]
    */
   // functions for build
-  function compileCommon(watch) {
-    var bundler = watchify(browserify(path.join(options.baseDir, 'common/index.js'), {
+  function compileShared(watch) {
+    var bundler = watchify(browserify(path.join(sharedDir, 'index.js'), {
       debug: true,
       noParse: options.browserify.noParse || []
     }).transform(babel));
@@ -73,12 +74,12 @@ module.exports = (gulp, options) => {
     rebundle();
   }
 
-  gulp.task('buildCommon', function () {
-    return compileCommon();
+  gulp.task('buildShared', function () {
+    return compileShared();
   });
 
-  gulp.task('watchCommon', function () {
-    return compileCommon(true);
+  gulp.task('watchShared', function () {
+    return compileShared(true);
   });
 
 
@@ -88,15 +89,16 @@ module.exports = (gulp, options) => {
     del([uiPublicDir])
   );
 
-  gulp.task('copy-res', function() {
+  gulp.task('copyRes', function() {
     gulp.src(uiDir + '/res/**/*')
       .pipe(gulp.dest(path.join(uiDir, 'public/res')));
   });
 
-  gulp.task('copy-res-jsoneditor', function() {
-    gulp.src(uiDir + '/bower_components/jsoneditor/dist/**/*')
-      .pipe(gulp.dest(path.join(uiDir, 'public/jsoneditor/dist')));
-  });
+  // TODO
+  // gulp.task('copy-res-jsoneditor', function() {
+  //   gulp.src(uiDir + '/bower_components/jsoneditor/dist/**/*')
+  //     .pipe(gulp.dest(path.join(uiDir, 'public/jsoneditor/dist')));
+  // });
 
   gulp.task('less', function() {
     gulp.src(uiDir + '/styles/**/*.less')
@@ -107,6 +109,9 @@ module.exports = (gulp, options) => {
       .pipe(gulp.dest(path.join(uiDir, 'styles')));
   });
 
+  /*
+   ['bs58.js', 'keys.js']
+   */
   gulp.task('vulcanize', ['less'], function() {
     return gulp.src(path.join(uiDir, 'index.html'))
       .pipe(vulcanize({
@@ -115,7 +120,7 @@ module.exports = (gulp, options) => {
         inlineCss: true,
         implicitStrip: true,
         stripComments: true,
-        excludes: ['bs58.js', 'keys.js'],
+        excludes: options.vulcanize.excludes || [],
         stripExcludes: false,
         strip: true
       }))
@@ -127,10 +132,13 @@ module.exports = (gulp, options) => {
       ;
   });
 
-  gulp.task('buildUi', ['cleanUi', 'buildCommon', 'vulcanize', 'copy-res', 'copy-res-jsoneditor']);
+  gulp.task('customBuildUi');
+
+  gulp.task('buildUi', ['cleanUi', 'buildShared', 'vulcanize', 'copyRes', 'customBuildUi']);
 
 
-  // Build distribution tasks
+  // Build distribution
+
   const distDir = path.join(options.baseDir, 'dist');
 
   gulp.task('cleanDist', () =>
@@ -138,7 +146,7 @@ module.exports = (gulp, options) => {
   );
 
   gulp.task('copyToDist', ['cleanDist'], () =>
-    gulp.src(['server/**/*', 'ui/**/*', 'common/**/*', 'config/**/*', '*.json', '*.md', '*.js'], {base: options.baseDir})
+    gulp.src(['server/**/*', 'ui/**/*', 'shared/**/*', 'config/**/*', '*.json', '*.md', '*.js'], {base: options.baseDir})
       .pipe(gulp.dest(distDir))
   );
 
@@ -151,8 +159,12 @@ module.exports = (gulp, options) => {
   gulp.task('clean', ['cleanDist', 'cleanUi']);
   gulp.task('dist', ['clean', 'buildUi', 'zip']);
 
+  // by default, it creates zip package for distribution
+  gulp.task('default', ['dist']);
 
-  // Mocha tasks
+
+  // Mocha tests run
+
   const mocha = require('gulp-mocha');
 
   const serverOptions = {
@@ -183,7 +195,7 @@ module.exports = (gulp, options) => {
   defineMochaTask('test.ui', 'test/ui/**/*_test.js', uiOptions);
 
 
-  // ESLint tasks
+  // ESLint run
   const eslint = require('gulp-eslint');
 
   gulp.task('lint', () => {
