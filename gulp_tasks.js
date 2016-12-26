@@ -1,7 +1,7 @@
 /**
  * Common gulp tasks for
  *  + build
- *    - browserify shared code for UI
+ *    - browserify shared code for client side (UI)
  *    - build pure client code
  *    - distribution package build
  *  + run mocha tests
@@ -9,6 +9,7 @@
  */
 'use strict';
 const path = require('path');
+const fs = require('fs');
 const _ = require('lodash');
 
 module.exports = (gulp, options) => {
@@ -39,43 +40,11 @@ module.exports = (gulp, options) => {
   const watchify = require('watchify');
   const babel = require('babelify');
 
-  /*
-  function compileShared(watch) {
-    var bundler = watchify(browserify(path.join(sharedDir, 'index.js'), {
-      debug: true,
-      noParse: options.browserify.noParse || []
-    }).transform(babel));
-
-    function rebundle() {
-      bundler.bundle()
-        .on('error', function (err) {
-          console.error(err);
-          this.emit('end');
-        })
-        .pipe(source('build.js'))
-        .pipe(buffer())
-        .pipe(sourcemaps.init({loadMaps: true}))
-        .pipe(sourcemaps.write('./'))
-        .pipe(gulp.dest(uiPublicDir));
-    }
-
-    if (watch) {
-      bundler.on('update', function () {
-        console.log('-> bundling...');
-        rebundle();
-      });
-    }
-
-    rebundle();
-  }
-
-  gulp.task('watchShared', function () {
-    return compileShared(true);
-  });
-  */
-
   gulp.task('buildShared', function () {
-    browserify(path.join(sharedDir, 'index.js'), {
+    const indexPath = path.join(sharedDir, 'index.js');
+    if (!fs.existsSync(indexPath))
+      return;
+    browserify(indexPath, {
       debug: true,
       noParse: options.browserify.noParse || []
     })
@@ -199,7 +168,7 @@ module.exports = (gulp, options) => {
   };
 
   defineMochaTask('test.server', 'test/server/**/*_test.js', serverOptions);
-  defineMochaTask('test.ui', 'test/client/**/*_test.js', uiOptions);
+  defineMochaTask('test.ui', 'test/ui/**/*_test.js', uiOptions);
 
 
   // ESLint run
