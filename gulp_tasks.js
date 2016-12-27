@@ -77,6 +77,8 @@ module.exports = (gulp, options) => {
   });
 
   gulp.task('bower', function() {
+    if (!fs.existsSync(path.join(clientDir, 'bower.json')))
+      return;
     return bower({cwd: clientDir});
   });
 
