@@ -27,8 +27,8 @@ module.exports = (gulp, options) => {
   }, options);
 
   const sharedDir = path.join(options.baseDir, 'shared');
-  const uiDir = path.join(options.baseDir, 'client');
-  const uiPublicDir = path.join(uiDir, 'public');
+  const clientDir = path.join(options.baseDir, 'client');
+  const clientPublicDir = path.join(clientDir, 'public');
 
 
   // Browserify shared (server & UI) code
@@ -54,43 +54,43 @@ module.exports = (gulp, options) => {
       .pipe(buffer())
       .pipe(sourcemaps.init({loadMaps: true}))
       .pipe(sourcemaps.write('./'))
-      .pipe(gulp.dest(uiPublicDir));
+      .pipe(gulp.dest(clientPublicDir));
   });
 
 
   // Build client code (UI)
-  var vulcanize = require('gulp-vulcanize');
-  var less = require('gulp-less');
-  var concat = require('gulp-concat');
-  var cleanCSS = require('gulp-clean-css');
-  var rename = require('gulp-rename');
+
+  const vulcanize = require('gulp-vulcanize');
+  const bower = require('gulp-bower');
+  const less = require('gulp-less');
+  const concat = require('gulp-concat');
+  const cleanCSS = require('gulp-clean-css');
+  const rename = require('gulp-rename');
 
   gulp.task('cleanClient', () =>
-    del([uiPublicDir])
+    del([clientPublicDir])
   );
 
   gulp.task('copyRes', function() {
-    gulp.src(uiDir + '/res/**/*')
-      .pipe(gulp.dest(path.join(uiDir, 'public/res')));
+    gulp.src(clientDir + '/res/**/*')
+      .pipe(gulp.dest(path.join(clientDir, 'public/res')));
   });
 
-  // TODO
-  // gulp.task('copy-res-jsoneditor', function() {
-  //   gulp.src(uiDir + '/bower_components/jsoneditor/dist/**/*')
-  //     .pipe(gulp.dest(path.join(uiDir, 'public/jsoneditor/dist')));
-  // });
+  gulp.task('bower', function() {
+    return bower({cwd: clientDir});
+  });
 
   gulp.task('less', function() {
-    gulp.src(uiDir + '/styles/**/*.less')
+    gulp.src(clientDir + '/styles/**/*.less')
       .pipe(less())
       .pipe(concat('_common.css'))
       .pipe(cleanCSS({processImport: false}))
       .pipe(rename({suffix: ".min"}))
-      .pipe(gulp.dest(path.join(uiDir, 'styles')));
+      .pipe(gulp.dest(path.join(clientDir, 'styles')));
   });
 
-  gulp.task('vulcanize', ['less'], function() {
-    return gulp.src(path.join(uiDir, 'index.html'))
+  gulp.task('vulcanize', ['bower', 'less'], function() {
+    return gulp.src(path.join(clientDir, 'index.html'))
       .pipe(vulcanize({
         abspath: '',
         inlineScripts: true,
@@ -104,7 +104,7 @@ module.exports = (gulp, options) => {
       .on("error", function(err) {
         console.log("gulp error: " + err);
       })
-      .pipe(gulp.dest(uiPublicDir))
+      .pipe(gulp.dest(clientPublicDir))
       ;
   });
 
