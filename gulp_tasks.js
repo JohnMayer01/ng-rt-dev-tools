@@ -122,7 +122,7 @@ module.exports = (gulp, options) => {
   );
 
   gulp.task('copyToDist', ['cleanDist'], () =>
-    gulp.src(['server/**/*', 'client/**/*', 'shared/**/*', 'config/**/*', '*.json', '*.md', '*.js'], {base: options.baseDir})
+    gulp.src(['server/**/*', 'client/public/**/*', 'shared/**/*', 'config/**/*', '*.json', '*.md', '*.js'], {base: options.baseDir})
       .pipe(gulp.dest(distDir))
   );
 
