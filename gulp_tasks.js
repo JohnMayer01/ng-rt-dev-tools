@@ -48,7 +48,7 @@ module.exports = (gulp, options) => {
       debug: true,
       noParse: options.browserify.noParse || []
     })
-      .transform(babel)
+      .transform(babel, {presets: ["es2015"]})
       .bundle()
       .pipe(source('build.js'))
       .pipe(buffer())
