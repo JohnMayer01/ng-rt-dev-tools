@@ -37,7 +37,6 @@ module.exports = (gulp, options) => {
   const source = require('vinyl-source-stream');
   const buffer = require('vinyl-buffer');
   const browserify = require('browserify');
-  const watchify = require('watchify');
   const babel = require('babelify');
 
   gulp.task('buildShared', function () {
