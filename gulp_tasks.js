@@ -29,6 +29,7 @@ module.exports = (gulp, options) => {
   const sharedDir = path.join(options.baseDir, 'shared');
   const clientDir = path.join(options.baseDir, 'client');
   const clientPublicDir = path.join(clientDir, 'public');
+  const clientBowerDir = path.join(clientDir, 'bower_components');
 
 
   // Browserify shared (server & UI) code
@@ -47,7 +48,8 @@ module.exports = (gulp, options) => {
       debug: true,
       noParse: options.browserify.noParse || []
     })
-      .transform(babel, {presets: ["es2015"]})
+      // .transform(babel, {presets: ['es2015']})
+      .transform(babel, {presets: [require('babel-preset-es2015')]})
       .bundle()
       .pipe(source('build.js'))
       .pipe(buffer())
@@ -66,9 +68,10 @@ module.exports = (gulp, options) => {
   const cleanCSS = require('gulp-clean-css');
   const rename = require('gulp-rename');
 
-  gulp.task('cleanClient', () =>
-    del([clientPublicDir])
-  );
+  gulp.task('cleanClient', cb => {
+    del.sync([clientPublicDir, clientBowerDir]);
+    cb();
+  });
 
   gulp.task('copyRes', function() {
     gulp.src(clientDir + '/res/**/*')
@@ -111,18 +114,19 @@ module.exports = (gulp, options) => {
 
   gulp.task('customBuildClient');
 
-  gulp.task('buildClient', ['cleanClient', 'buildShared', 'vulcanize', 'copyRes', 'customBuildClient']);
+  gulp.task('buildClient', ['buildShared', 'vulcanize', 'copyRes', 'customBuildClient']);
 
 
   // Build distribution
 
   const distDir = path.join(options.baseDir, 'dist');
 
-  gulp.task('cleanDist', () =>
-    del([distDir])
-  );
+  gulp.task('cleanDist', cb => {
+    del.sync([distDir]);
+    cb();
+  });
 
-  gulp.task('copyToDist', ['cleanDist'], () =>
+  gulp.task('copyToDist', () =>
     gulp.src(['server/**/*', 'client/public/**/*', 'shared/**/*', 'config/**/*', '*.json', '*.md', '*.js'], {base: options.baseDir})
       .pipe(gulp.dest(distDir))
   );
@@ -135,6 +139,8 @@ module.exports = (gulp, options) => {
 
   gulp.task('clean', ['cleanDist', 'cleanClient']);
   gulp.task('dist', ['clean', 'buildClient', 'zip']);
+  gulp.task('build', ['buildClient']);
+  gulp.task('rebuild', ['clean', 'build']);
 
   // by default, it creates zip package for distribution
   gulp.task('default', ['dist']);
@@ -160,7 +166,7 @@ module.exports = (gulp, options) => {
   };
 
   const defineMochaTask = (taskName, src, options) => {
-    gulp.task(taskName, [], () => {
+    return gulp.task(taskName, [], () => {
       gulp.src(src)
         .pipe(mocha(options))
         .once('error', testError)
