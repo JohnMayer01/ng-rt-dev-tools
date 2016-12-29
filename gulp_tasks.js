@@ -74,7 +74,7 @@ module.exports = (gulp, options) => {
   });
 
   gulp.task('copyRes', function() {
-    gulp.src(clientDir + '/res/**/*')
+    gulp.src(clientDir + '/src/res/**/*')
       .pipe(gulp.dest(path.join(clientDir, 'public/res')));
   });
 
@@ -85,16 +85,16 @@ module.exports = (gulp, options) => {
   });
 
   gulp.task('less', function() {
-    gulp.src(clientDir + '/styles/**/*.less')
+    gulp.src(clientDir + '/src/styles/**/*.less')
       .pipe(less())
       .pipe(concat('_common.css'))
       .pipe(cleanCSS({processImport: false}))
       .pipe(rename({suffix: ".min"}))
-      .pipe(gulp.dest(path.join(clientDir, 'styles')));
+      .pipe(gulp.dest(path.join(clientDir, 'src', 'styles')));
   });
 
   gulp.task('vulcanize', ['bower', 'less'], function() {
-    return gulp.src(path.join(clientDir, 'index.html'))
+    return gulp.src(path.join(clientDir, 'src', 'index.html'))
       .pipe(vulcanize({
         abspath: '',
         inlineScripts: true,
