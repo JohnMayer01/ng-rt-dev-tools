@@ -126,7 +126,7 @@ module.exports = (gulp, options) => {
     cb();
   });
 
-  gulp.task('copyToDist', () =>
+  gulp.task('copyToDist', ['buildClient'], () =>
     gulp.src(['server/**/*', 'client/public/**/*', 'shared/**/*', 'config/**/*', '*.json', '*.md', '*.js'], {base: options.baseDir})
       .pipe(gulp.dest(distDir))
   );
@@ -138,7 +138,7 @@ module.exports = (gulp, options) => {
   });
 
   gulp.task('clean', ['cleanDist', 'cleanClient']);
-  gulp.task('dist', ['clean', 'buildClient', 'zip']);
+  gulp.task('dist', ['clean', 'zip']);
   gulp.task('build', ['buildClient']);
   gulp.task('rebuild', ['clean', 'build']);
 
