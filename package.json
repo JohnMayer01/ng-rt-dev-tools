@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "preferGlobal": "true"
    "bin": {
     "ng-rt-dev-tools": "index.js"
   }, 
