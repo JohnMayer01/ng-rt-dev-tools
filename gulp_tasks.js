@@ -16,6 +16,8 @@ module.exports = (gulp, options) => {
   const zip = require('gulp-zip');
   const del = require('del');
 
+  // we use gulp instance provided by a module via parameter
+  // but if there is no ref. to gulp, then we use
   if (!gulp)
     gulp = require("gulp");
 
@@ -75,28 +77,30 @@ module.exports = (gulp, options) => {
     cb();
   });
 
-  gulp.task('copyRes', function() {
+  gulp.task('copyRes', () =>
     gulp.src(clientDir + '/src/res/**/*')
-      .pipe(gulp.dest(path.join(clientDir, 'public/res')));
-  });
+      .pipe(gulp.dest(path.join(clientDir, 'public/res')))
+  );
 
-  gulp.task('bower', function() {
+  gulp.task('bower', () => {
     if (!fs.existsSync(path.join(clientDir, 'bower.json')))
-      return;
-    return bower({cwd: clientDir});
+      return Promise.resolve();
+    return bower({
+      cwd: clientDir
+    });
   });
 
-  gulp.task('less', function() {
+  gulp.task('less', () =>
     gulp.src(clientDir + '/src/styles/**/*.less')
       .pipe(less())
       .pipe(concat('_common.css'))
       .pipe(cleanCSS({processImport: false}))
       .pipe(rename({suffix: ".min"}))
-      .pipe(gulp.dest(path.join(clientDir, 'src', 'styles')));
-  });
+      .pipe(gulp.dest(path.join(clientDir, 'src', 'styles')))
+  );
 
-  gulp.task('vulcanize', ['bower', 'less'], function() {
-    return gulp.src(path.join(clientDir, 'src', 'index.html'))
+  gulp.task('vulcanize', ['bower', 'less'], () =>
+    gulp.src(path.join(clientDir, 'src', 'index.html'))
       .pipe(vulcanize({
         abspath: '',
         inlineScripts: true,
@@ -111,8 +115,7 @@ module.exports = (gulp, options) => {
         console.log("gulp error: " + err);
       })
       .pipe(gulp.dest(clientPublicDir))
-      ;
-  });
+  );
 
   gulp.task('customBuildClient');
 
@@ -133,11 +136,11 @@ module.exports = (gulp, options) => {
       .pipe(gulp.dest(distDir))
   );
 
-  gulp.task('zip', ['copyToDist'], () => {
+  gulp.task('zip', ['copyToDist'], () =>
     gulp.src('dist/**/*')
       .pipe(zip(options.name + '.zip'))
-      .pipe(gulp.dest(distDir));
-  });
+      .pipe(gulp.dest(distDir))
+  );
 
   gulp.task('clean', ['cleanDist', 'cleanClient']);
   gulp.task('dist', ['clean', 'zip']);
@@ -168,12 +171,12 @@ module.exports = (gulp, options) => {
   };
 
   const defineMochaTask = (taskName, src, options) => {
-    return gulp.task(taskName, [], () => {
+    gulp.task(taskName, () =>
       gulp.src(src)
         .pipe(mocha(options))
         .once('error', testError)
-        .once('end', testEnd);
-    });
+        .once('end', testEnd)
+    );
   };
 
   defineMochaTask('test.server', 'test/server/**/*_test.js', serverOptions);
@@ -183,8 +186,8 @@ module.exports = (gulp, options) => {
   // ESLint run
   const eslint = require('gulp-eslint');
 
-  gulp.task('lint', () => {
-    return gulp.src([
+  gulp.task('lint', () =>
+    gulp.src([
       '**/*.js',
       '!**/*.min.js',
       '!node_modules/**',
@@ -198,7 +201,7 @@ module.exports = (gulp, options) => {
       .pipe(eslint.format())
       .pipe(gulp.dest(function(file) {
         return file.base;
-      }));
+      }))
     // .pipe(eslint.failAfterError());
-  });
+  );
 };
