@@ -136,7 +136,12 @@ module.exports = (gulp, options) => {
       .pipe(gulp.dest(distDir))
   );
 
-  gulp.task('zip', ['copyToDist'], () =>
+  gulp.task('writeVersion', (cb) => {
+    fs.writeFileSync(path.join(distDir, 'ng-rt-version'), process.env.CI_PIPELINE_ID);
+    cb();
+  });
+
+  gulp.task('zip', ['copyToDist', 'writeVersion'], () =>
     gulp.src('dist/**/*')
       .pipe(zip(options.name + '.zip'))
       .pipe(gulp.dest(distDir))
