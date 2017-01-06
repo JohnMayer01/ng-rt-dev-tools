@@ -40,18 +40,14 @@ module.exports = (gulp, options) => {
   const browserify = require('browserify');
   const babel = require('babelify');
 
-  gulp.task('buildShared', cb => {
+  gulp.task('buildShared', () => {
     const indexPath = path.join(sharedDir, 'index.js');
 
     // if there is no index.js, then skip
     if (!fs.existsSync(indexPath))
-      return cb();
+      return Promise.resolve();
 
-    // destination
-    const dest = gulp.dest(clientPublicDir);
-    dest.on('finish', cb);
-
-    browserify(indexPath, {
+    return browserify(indexPath, {
       debug: true,
       noParse: options.browserify.noParse || []
     })
@@ -61,7 +57,7 @@ module.exports = (gulp, options) => {
       .pipe(buffer())
       .pipe(sourcemaps.init({loadMaps: true}))
       .pipe(sourcemaps.write('./'))
-      .pipe(dest);
+      .pipe(gulp.dest(clientPublicDir));
   });
 
 
