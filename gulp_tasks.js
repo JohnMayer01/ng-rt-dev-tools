@@ -40,22 +40,28 @@ module.exports = (gulp, options) => {
   const browserify = require('browserify');
   const babel = require('babelify');
 
-  gulp.task('buildShared', function () {
+  gulp.task('buildShared', cb => {
     const indexPath = path.join(sharedDir, 'index.js');
+
+    // if there is no index.js, then skip
     if (!fs.existsSync(indexPath))
-      return;
+      return cb();
+
+    // destination
+    const dest = gulp.dest(clientPublicDir);
+    dest.on('finish', cb);
+
     browserify(indexPath, {
       debug: true,
       noParse: options.browserify.noParse || []
     })
-      // .transform(babel, {presets: ['es2015']})
       .transform(babel, {presets: [require('babel-preset-es2015')]})
       .bundle()
       .pipe(source('build.js'))
       .pipe(buffer())
       .pipe(sourcemaps.init({loadMaps: true}))
       .pipe(sourcemaps.write('./'))
-      .pipe(gulp.dest(clientPublicDir));
+      .pipe(dest);
   });
 
 
