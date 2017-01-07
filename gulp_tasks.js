@@ -207,6 +207,6 @@ module.exports = (gulp, options) => {
       .pipe(gulp.dest(function(file) {
         return file.base;
       }))
-    // .pipe(eslint.failAfterError());
+      .pipe(eslint.failAfterError())
   );
 };
