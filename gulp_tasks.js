@@ -213,7 +213,7 @@ module.exports = (gulp, options) => {
   var jsdoc = require('gulp-jsdoc3');
 
   gulp.task('doc', function (cb) {
-      gulp.src(['README.md', 'server/**/*.js', 'client/public/**/*', 'shared/**/*', '*.js'], {read: false})
+      gulp.src(['server/**/*.js', 'client/public/**/*', 'shared/**/*', '*.js'], {read: false})
           .pipe(jsdoc(cb));
   });
 
