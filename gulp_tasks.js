@@ -33,7 +33,6 @@ module.exports = (gulp, options) => {
   const clientPublicDir = path.join(clientDir, 'public');
   const clientBowerDir = path.join(clientDir, 'bower_components');
 
-
   // Browserify shared (server & UI) code
 
   const sourcemaps = require('gulp-sourcemaps');
@@ -61,7 +60,6 @@ module.exports = (gulp, options) => {
       .pipe(sourcemaps.write('./'))
       .pipe(gulp.dest(clientPublicDir));
   });
-
 
   // Build client code (UI)
 
@@ -121,7 +119,6 @@ module.exports = (gulp, options) => {
 
   gulp.task('buildClient', ['buildShared', 'vulcanize', 'copyRes', 'customBuildClient']);
 
-
   // Build distribution
 
   const distDir = path.join(options.baseDir, 'dist');
@@ -132,11 +129,12 @@ module.exports = (gulp, options) => {
   });
 
   gulp.task('copyToDist', ['buildClient'], () =>
-    gulp.src(['server/**/*', 'client/public/**/*', 'shared/**/*', 'config/**/*', '*.json', '*.md', '*.js'], {base: options.baseDir})
+    gulp.src(['server/**/*', 'client/public/**/*', 'shared/**/*', 'config/**/*', '*.json', '*.md', '*.js'],
+      {base: options.baseDir})
       .pipe(gulp.dest(distDir))
   );
 
-  gulp.task('writeVersion', ['copyToDist'], (cb) => {
+  gulp.task('writeVersion', ['copyToDist'], cb => {
     fs.writeFileSync(path.join(distDir, 'ng-rt-version'), process.env.CI_PIPELINE_ID);
     cb();
   });
@@ -154,7 +152,6 @@ module.exports = (gulp, options) => {
 
   // by default, it creates zip package for distribution
   gulp.task('default', ['dist']);
-
 
   // Mocha tests run
 
@@ -186,7 +183,6 @@ module.exports = (gulp, options) => {
 
   defineMochaTask('test.server', 'test/server/**/*_test.js', serverOptions);
   defineMochaTask('test.ui', 'test/ui/**/*_test.js', uiOptions);
-
 
   // ESLint run
   const eslint = require('gulp-eslint');
