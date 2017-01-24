@@ -49,14 +49,18 @@ module.exports = (gulp, options) => {
       return Promise.resolve();
 
     return browserify(indexPath, {
-      debug: true,
-      noParse: options.browserify.noParse || []
-    })
-      .transform(babel, {presets: [require('babel-preset-es2015')]})
+        debug: true,
+        noParse: options.browserify.noParse || []
+      })
+      .transform(babel, {
+        presets: [require('babel-preset-es2015')]
+      })
       .bundle()
       .pipe(source('build.js'))
       .pipe(buffer())
-      .pipe(sourcemaps.init({loadMaps: true}))
+      .pipe(sourcemaps.init({
+        loadMaps: true
+      }))
       .pipe(sourcemaps.write('./'))
       .pipe(gulp.dest(clientPublicDir));
   });
@@ -77,7 +81,7 @@ module.exports = (gulp, options) => {
 
   gulp.task('copyRes', () =>
     gulp.src(clientDir + '/src/res/**/*')
-      .pipe(gulp.dest(path.join(clientDir, 'public/res')))
+    .pipe(gulp.dest(path.join(clientDir, 'public/res')))
   );
 
   gulp.task('bower', () => {
@@ -90,29 +94,33 @@ module.exports = (gulp, options) => {
 
   gulp.task('less', () =>
     gulp.src(clientDir + '/src/styles/**/*.less')
-      .pipe(less())
-      .pipe(concat('_common.css'))
-      .pipe(cleanCSS({processImport: false}))
-      .pipe(rename({suffix: ".min"}))
-      .pipe(gulp.dest(path.join(clientDir, 'src', 'styles')))
+    .pipe(less())
+    .pipe(concat('_common.css'))
+    .pipe(cleanCSS({
+      processImport: false
+    }))
+    .pipe(rename({
+      suffix: ".min"
+    }))
+    .pipe(gulp.dest(path.join(clientDir, 'src', 'styles')))
   );
 
   gulp.task('vulcanize', ['bower', 'less'], () =>
     gulp.src(path.join(clientDir, 'src', 'index.html'))
-      .pipe(vulcanize({
-        abspath: '',
-        inlineScripts: true,
-        inlineCss: true,
-        implicitStrip: true,
-        stripComments: true,
-        excludes: Array.concat(['build.js'], options.vulcanize.excludes || []),
-        stripExcludes: false,
-        strip: true
-      }))
-      .on("error", function(err) {
-        console.log("gulp error: " + err);
-      })
-      .pipe(gulp.dest(clientPublicDir))
+    .pipe(vulcanize({
+      abspath: '',
+      inlineScripts: true,
+      inlineCss: true,
+      implicitStrip: true,
+      stripComments: true,
+      excludes: Array.concat(['build.js'], options.vulcanize.excludes || []),
+      stripExcludes: false,
+      strip: true
+    }))
+    .on("error", function(err) {
+      console.log("gulp error: " + err);
+    })
+    .pipe(gulp.dest(clientPublicDir))
   );
 
   gulp.task('customBuildClient');
@@ -129,9 +137,10 @@ module.exports = (gulp, options) => {
   });
 
   gulp.task('copyToDist', ['buildClient'], () =>
-    gulp.src(['server/**/*', 'client/public/**/*', 'shared/**/*', 'config/**/*', '*.json', '*.md', '*.js'],
-      {base: options.baseDir})
-      .pipe(gulp.dest(distDir))
+    gulp.src(['server/**/*', 'client/public/**/*', 'docs/**.*', 'shared/**/*', 'config/**/*', '*.json', '*.md', '*.js'], {
+      base: options.baseDir
+    })
+    .pipe(gulp.dest(distDir))
   );
 
   gulp.task('writeVersion', ['copyToDist'], cb => {
@@ -141,8 +150,8 @@ module.exports = (gulp, options) => {
 
   gulp.task('zip', ['writeVersion'], () =>
     gulp.src('dist/**/*')
-      .pipe(zip(options.name + '.zip'))
-      .pipe(gulp.dest(distDir))
+    .pipe(zip(options.name + '.zip'))
+    .pipe(gulp.dest(distDir))
   );
 
   gulp.task('clean', ['cleanDist', 'cleanClient']);
@@ -175,9 +184,9 @@ module.exports = (gulp, options) => {
   const defineMochaTask = (taskName, src, options) => {
     gulp.task(taskName, () =>
       gulp.src(src)
-        .pipe(mocha(options))
-        .once('error', testError)
-        .once('end', testEnd)
+      .pipe(mocha(options))
+      .once('error', testError)
+      .once('end', testEnd)
     );
   };
 
@@ -198,19 +207,23 @@ module.exports = (gulp, options) => {
       '!docs/**',
       '!dist/**'
     ])
-      .pipe(eslint({fix: true}))
-      .pipe(eslint.format())
-      .pipe(gulp.dest(function(file) {
-        return file.base;
-      }))
-      .pipe(eslint.failAfterError())
+    .pipe(eslint({
+      fix: true
+    }))
+    .pipe(eslint.format())
+    .pipe(gulp.dest(function(file) {
+      return file.base;
+    }))
+    .pipe(eslint.failAfterError())
   );
 
   var jsdoc = require('gulp-jsdoc3');
 
-  gulp.task('doc', function (cb) {
-      gulp.src(['server/**/*.js', 'client/public/**/*', 'shared/**/*', '*.js'], {read: false})
-          .pipe(jsdoc(cb));
+  gulp.task('doc', function(cb) {
+    gulp.src(['server/**/*.js', 'client/public/**/*', 'shared/**/*', '*.js'], {
+        read: false
+      })
+      .pipe(jsdoc(cb));
   });
 
 };
