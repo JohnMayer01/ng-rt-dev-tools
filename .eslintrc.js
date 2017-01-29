@@ -10,5 +10,10 @@ module.exports = {
     eqeqeq: [0],
     "strict": 2,
     "max-len": [1, {code: 120}]
-  }
+  },
+  "predef": [
+    "describe",
+    "should",
+    "it"  
+  ]
 };
