@@ -11,9 +11,8 @@ module.exports = {
     "strict": 2,
     "max-len": [1, {code: 120}]
   },
-  "predef": [
-    "describe",
-    "should",
-    "it"  
-  ]
+  env: {
+    "node": true,
+    "mocha": true
+  }
 };
