@@ -13,7 +13,6 @@ module.exports = {
   },
   env: {
     "node": true,
-    "mocha": true,
-    "chai": true
+    "mocha": true
   }
 };
