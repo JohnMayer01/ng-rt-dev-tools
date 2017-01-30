@@ -21,6 +21,14 @@ module.exports = (gulp, options) => {
   if (!gulp)
     gulp = require("gulp");
 
+  // constructor(gulp, cmdArgs, gulpCallbackName): gulp
+  //   gulp an instance of gulp.
+  //   cmdArgs arguments from command line. In most cases it would be process.argv
+  //   gulpCallbackName name of methodargument which will be use to inject async gulp callback.
+  //   It is an option parameter. If you not defined it a default value would be set to `callback`
+  // returns wrapped gulp instance with enabled param injection.
+  const gulpWithParams = require('gulp-param')(gulp, process.argv);
+
   options = _.extend({
     name: path.basename(path.dirname(module.parent.parent.filename)),
     baseDir: path.dirname(module.parent.parent.filename),
@@ -74,9 +82,9 @@ module.exports = (gulp, options) => {
   const cleanCSS = require('gulp-clean-css');
   const rename = require('gulp-rename');
 
-  gulp.task('cleanClient', cb => {
+  gulp.task('cleanClient', callback => {
     del.sync([clientPublicDir, clientBowerDir]);
-    cb();
+    callback();
   });
 
   gulp.task('copyRes', () =>
@@ -131,9 +139,9 @@ module.exports = (gulp, options) => {
 
   const distDir = path.join(options.baseDir, 'dist');
 
-  gulp.task('cleanDist', cb => {
+  gulp.task('cleanDist', callback => {
     del.sync([distDir]);
-    cb();
+    callback();
   });
 
   gulp.task('copyToDist', ['buildClient'], () =>
@@ -143,9 +151,9 @@ module.exports = (gulp, options) => {
     .pipe(gulp.dest(distDir))
   );
 
-  gulp.task('writeVersion', ['copyToDist'], cb => {
+  gulp.task('writeVersion', ['copyToDist'], callback => {
     fs.writeFileSync(path.join(distDir, 'ng-rt-version'), process.env.CI_PIPELINE_ID);
-    cb();
+    callback();
   });
 
   gulp.task('zip', ['writeVersion'], () =>
@@ -196,8 +204,8 @@ module.exports = (gulp, options) => {
   // ESLint run
   const eslint = require('gulp-eslint');
 
-  gulp.task('lint', () =>
-    gulp.src([
+  gulpWithParams.task('lint', (src) =>
+    gulp.src(src || [
       '**/*.js',
       '!**/*.min.js',
       '!node_modules/**',
@@ -219,11 +227,11 @@ module.exports = (gulp, options) => {
 
   var jsdoc = require('gulp-jsdoc3');
 
-  gulp.task('doc', function(cb) {
+  gulp.task('doc', function(callback) {
     gulp.src(['server/**/*.js', 'client/public/**/*', 'shared/**/*', '*.js'], {
         read: false
       })
-      .pipe(jsdoc(cb));
+      .pipe(jsdoc(callback));
   });
 
 };
