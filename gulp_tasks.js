@@ -198,8 +198,8 @@ module.exports = (gulp, options) => {
   // ESLint run
   const eslint = require('gulp-eslint');
 
-  gulp.task('lint', () => {
-    return gulp.src(options.src || [
+  gulp.task('lint', () =>
+    gulp.src(options.src || [
         '**/*.js',
         '!**/*.min.js',
         '!node_modules/**',
@@ -217,7 +217,7 @@ module.exports = (gulp, options) => {
         return file.base;
       }))
       .pipe(eslint.failAfterError())
-  });
+  );
 
   var jsdoc = require('gulp-jsdoc3');
 
