@@ -21,13 +21,9 @@ module.exports = (gulp, options) => {
   if (!gulp)
     gulp = require("gulp");
 
-  // constructor(gulp, cmdArgs, gulpCallbackName): gulp
-  //   gulp an instance of gulp.
-  //   cmdArgs arguments from command line. In most cases it would be process.argv
-  //   gulpCallbackName name of methodargument which will be use to inject async gulp callback.
-  //   It is an option parameter. If you not defined it a default value would be set to `callback`
-  // returns wrapped gulp instance with enabled param injection.
-  const gulpWithParams = require('gulp-param')(gulp, process.argv);
+  var options = require('minimist')(process.argv.slice(2), {
+    string: ['src']
+  });
 
   options = _.extend({
     name: path.basename(path.dirname(module.parent.parent.filename)),
@@ -57,9 +53,9 @@ module.exports = (gulp, options) => {
       return Promise.resolve();
 
     return browserify(indexPath, {
-        debug: true,
-        noParse: options.browserify.noParse || []
-      })
+      debug: true,
+      noParse: options.browserify.noParse || []
+    })
       .transform(babel, {
         presets: [require('babel-preset-es2015')]
       })
@@ -89,7 +85,7 @@ module.exports = (gulp, options) => {
 
   gulp.task('copyRes', () =>
     gulp.src(clientDir + '/src/res/**/*')
-    .pipe(gulp.dest(path.join(clientDir, 'public/res')))
+      .pipe(gulp.dest(path.join(clientDir, 'public/res')))
   );
 
   gulp.task('bower', () => {
@@ -102,33 +98,33 @@ module.exports = (gulp, options) => {
 
   gulp.task('less', () =>
     gulp.src(clientDir + '/src/styles/**/*.less')
-    .pipe(less())
-    .pipe(concat('_common.css'))
-    .pipe(cleanCSS({
-      processImport: false
-    }))
-    .pipe(rename({
-      suffix: ".min"
-    }))
-    .pipe(gulp.dest(path.join(clientDir, 'src', 'styles')))
+      .pipe(less())
+      .pipe(concat('_common.css'))
+      .pipe(cleanCSS({
+        processImport: false
+      }))
+      .pipe(rename({
+        suffix: ".min"
+      }))
+      .pipe(gulp.dest(path.join(clientDir, 'src', 'styles')))
   );
 
   gulp.task('vulcanize', ['bower', 'less'], () =>
     gulp.src(path.join(clientDir, 'src', 'index.html'))
-    .pipe(vulcanize({
-      abspath: '',
-      inlineScripts: true,
-      inlineCss: true,
-      implicitStrip: true,
-      stripComments: true,
-      excludes: Array.concat(['build.js'], options.vulcanize.excludes || []),
-      stripExcludes: false,
-      strip: true
-    }))
-    .on("error", function(err) {
-      console.log("gulp error: " + err);
-    })
-    .pipe(gulp.dest(clientPublicDir))
+      .pipe(vulcanize({
+        abspath: '',
+        inlineScripts: true,
+        inlineCss: true,
+        implicitStrip: true,
+        stripComments: true,
+        excludes: Array.concat(['build.js'], options.vulcanize.excludes || []),
+        stripExcludes: false,
+        strip: true
+      }))
+      .on("error", function(err) {
+        console.log("gulp error: " + err);
+      })
+      .pipe(gulp.dest(clientPublicDir))
   );
 
   gulp.task('customBuildClient');
@@ -148,7 +144,7 @@ module.exports = (gulp, options) => {
     gulp.src(['server/**/*', 'client/**/*', 'api/**/*', 'generators/**/*', 'ui/**/*', 'uiObject/**/*','scripts/**/*', 'docs/**/*', 'state-machine/**/*','shared/**/*', 'config/**/*', '*.json', '*.md', '*.js'], {
       base: options.baseDir
     })
-    .pipe(gulp.dest(distDir))
+      .pipe(gulp.dest(distDir))
   );
 
   gulp.task('writeVersion', ['copyToDist'], callback => {
@@ -158,8 +154,8 @@ module.exports = (gulp, options) => {
 
   gulp.task('zip', ['writeVersion'], () =>
     gulp.src('dist/**/*')
-    .pipe(zip(options.name + '.zip'))
-    .pipe(gulp.dest(distDir))
+      .pipe(zip(options.name + '.zip'))
+      .pipe(gulp.dest(distDir))
   );
 
   gulp.task('clean', ['cleanDist', 'cleanClient']);
@@ -192,9 +188,9 @@ module.exports = (gulp, options) => {
   const defineMochaTask = (taskName, src, options) => {
     gulp.task(taskName, () =>
       gulp.src(src)
-      .pipe(mocha(options))
-      .once('error', testError)
-      .once('end', testEnd)
+        .pipe(mocha(options))
+        .once('error', testError)
+        .once('end', testEnd)
     );
   };
 
@@ -204,33 +200,33 @@ module.exports = (gulp, options) => {
   // ESLint run
   const eslint = require('gulp-eslint');
 
-  gulpWithParams.task('lint', (src) =>
-    gulp.src(src || [
-      '**/*.js',
-      '!**/*.min.js',
-      '!node_modules/**',
-      '!**/bower_components/**',
-      '!**/public/**',
-      '!plugins/**',
-      '!docs/**',
-      '!dist/**'
-    ])
-    .pipe(eslint({
-      fix: true
-    }))
-    .pipe(eslint.format())
-    .pipe(gulp.dest(function(file) {
-      return file.base;
-    }))
-    .pipe(eslint.failAfterError())
-  );
+  gulp.task('lint', () => {
+    return gulp.src(options.src || [
+        '**/*.js',
+        '!**/*.min.js',
+        '!node_modules/**',
+        '!**/bower_components/**',
+        '!**/public/**',
+        '!plugins/**',
+        '!docs/**',
+        '!dist/**'
+      ])
+      .pipe(eslint({
+        fix: true
+      }))
+      .pipe(eslint.format())
+      .pipe(gulp.dest(function(file) {
+        return file.base;
+      }))
+      .pipe(eslint.failAfterError())
+  });
 
   var jsdoc = require('gulp-jsdoc3');
 
   gulp.task('doc', function(callback) {
     gulp.src(['server/**/*.js', 'client/public/**/*', 'shared/**/*', '*.js'], {
-        read: false
-      })
+      read: false
+    })
       .pipe(jsdoc(callback));
   });
 
