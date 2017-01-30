@@ -19,3 +19,5 @@ to link:
 
 /usr/lib/node_modules/ng-rt-dev-tools -> /home/alex/Projects/tymlez/ng-rt-dev-tools
 
+## do linting for a specific folder
+gulp lint --src "cli/**/*"
