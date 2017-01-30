@@ -21,16 +21,14 @@ module.exports = (gulp, options) => {
   if (!gulp)
     gulp = require("gulp");
 
-  var options = require('minimist')(process.argv.slice(2), {
-    string: ['src']
-  });
-
   options = _.extend({
     name: path.basename(path.dirname(module.parent.parent.filename)),
     baseDir: path.dirname(module.parent.parent.filename),
     browserify: {},
     vulcanize: {}
-  }, options);
+  }, require('minimist')(process.argv.slice(2), {
+    string: ['src']
+  }), options);
 
   const sharedDir = path.join(options.baseDir, 'shared');
   const clientDir = path.join(options.baseDir, 'client');
