@@ -205,7 +205,7 @@ module.exports = (gulp, options) => {
   defineMochaTask('test.server', 'test/server/**/*_test.js', serverOptions);
   defineMochaTask('test.ui', 'test/ui/**/*_test.js', uiOptions);
   defineMochaTask('test', options.src || 'test/server/**/*_test.js', {
-    timeput: options.timeout || serverOptions.timeout
+    timeout: options.timeout || serverOptions.timeout
   });
 
   // ESLint run
