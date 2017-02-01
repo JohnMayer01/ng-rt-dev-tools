@@ -193,10 +193,10 @@ module.exports = (gulp, options) => {
     process.exit();
   };
 
-  const defineMochaTask = (taskName, src, options) => {
+  const defineMochaTask = (taskName, src, mochaOptions) => {
     gulp.task(taskName, () =>
       gulp.src(src)
-        .pipe(mocha(options))
+        .pipe(mocha(mochaOptions))
         .once('error', testError)
         .once('end', testEnd)
     );
@@ -204,6 +204,9 @@ module.exports = (gulp, options) => {
 
   defineMochaTask('test.server', 'test/server/**/*_test.js', serverOptions);
   defineMochaTask('test.ui', 'test/ui/**/*_test.js', uiOptions);
+  defineMochaTask('test', options.src || 'test/server/**/*_test.js', {
+    timeput: options.timeout || serverOptions.timeout
+  });
 
   // ESLint run
   const eslint = require('gulp-eslint');
