@@ -232,7 +232,7 @@ module.exports = (gulp, options) => {
       .pipe(eslint.failAfterError())
   );
 
-  var jsdoc = require('gulp-jsdoc3');
+  const jsdoc = require('gulp-jsdoc3');
 
   gulp.task('doc', function(callback) {
     gulp.src(['server/**/*.js', 'client/public/**/*', 'shared/**/*', '*.js'], {
