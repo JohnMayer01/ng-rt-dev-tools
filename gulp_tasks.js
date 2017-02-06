@@ -179,7 +179,7 @@ module.exports = (gulp, options) => {
   const mocha = require('gulp-mocha');
 
   const serverOptions = {
-    timeout: 20000 // 20 seconds
+    timeout: 30000 // 30 seconds
   };
   const uiOptions = {
     timeout: 30000 // 30 seconds
