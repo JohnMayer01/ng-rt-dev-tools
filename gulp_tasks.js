@@ -149,7 +149,8 @@ module.exports = (gulp, options) => {
   });
 
   gulp.task('copyToDist', ['buildClient'], () =>
-    gulp.src(['server/**/*', 'client/**/*', 'api/**/*', 'generators/**/*', 'ui/**/*', 'uiObject/**/*','scripts/**/*', 'docs/**/*', 'state-machine/**/*','shared/**/*', 'config/**/*', '*.json', '*.md', '*.js'], {
+    gulp.src(['server/**/*', 'client/**/*', 'api/**/*', 'generators/**/*', 'ui/**/*', 'uiObject/**/*','scripts/**/*',
+      'docs/**/*', 'state-machine/**/*','shared/**/*', 'config/**/*', '*.json', '*.md', '*.js'], {
       base: options.baseDir
     })
       .pipe(gulp.dest(distDir))
