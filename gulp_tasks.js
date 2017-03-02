@@ -18,7 +18,7 @@ module.exports = (gulp, options) => {
   if (!gulp)
     gulp = require("gulp");
 
-  var gulpsync = require('gulp-sync')(gulp);
+  const gulpsync = require('gulp-sync')(gulp);
   const zip = require('gulp-zip');
   const del = require('del');
 
@@ -118,7 +118,7 @@ module.exports = (gulp, options) => {
       .pipe(gulp.dest(path.join(clientDir, 'src', 'styles')))
   );
 
-  gulp.task('vulcanize', gulpsync.sync(['bower', 'less'], () =>
+  gulp.task('vulcanize', gulpsync.sync(['bower', 'less']), () =>
     gulp.src(path.join(clientDir, 'src', 'index.html'))
       .pipe(vulcanize({
         abspath: '',
@@ -134,7 +134,7 @@ module.exports = (gulp, options) => {
         console.log("gulp error: " + err);
       })
       .pipe(gulp.dest(clientPublicDir))
-  ));
+  );
 
   gulp.task('customBuildClient');
 
