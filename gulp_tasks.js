@@ -13,13 +13,14 @@ const fs = require('fs');
 const _ = require('lodash');
 
 module.exports = (gulp, options) => {
-  const zip = require('gulp-zip');
-  const del = require('del');
-
   // we use gulp instance provided by a module via parameter
   // but if there is no ref. to gulp, then we use
   if (!gulp)
     gulp = require("gulp");
+
+  var gulpsync = require('gulp-sync')(gulp);
+  const zip = require('gulp-zip');
+  const del = require('del');
 
   // from the lowest priority to the highest
   options = _.extend(
@@ -117,7 +118,7 @@ module.exports = (gulp, options) => {
       .pipe(gulp.dest(path.join(clientDir, 'src', 'styles')))
   );
 
-  gulp.task('vulcanize', ['bower', 'less'], () =>
+  gulp.task('vulcanize', gulpsync.sync(['bower', 'less'], () =>
     gulp.src(path.join(clientDir, 'src', 'index.html'))
       .pipe(vulcanize({
         abspath: '',
@@ -133,11 +134,11 @@ module.exports = (gulp, options) => {
         console.log("gulp error: " + err);
       })
       .pipe(gulp.dest(clientPublicDir))
-  );
+  ));
 
   gulp.task('customBuildClient');
 
-  gulp.task('buildClient', ['buildShared', 'vulcanize', 'copyRes', 'customBuildClient']);
+  gulp.task('buildClient', gulpsync.sync(['buildShared', 'vulcanize', 'copyRes', 'customBuildClient']));
 
   // Build distribution
 
@@ -168,9 +169,9 @@ module.exports = (gulp, options) => {
   );
 
   gulp.task('clean', ['cleanDist', 'cleanClient']);
-  gulp.task('dist', ['clean', 'zip']);
+  gulp.task('dist', gulpsync.sync(['clean', 'zip']));
   gulp.task('build', ['buildClient']);
-  gulp.task('rebuild', ['clean', 'build']);
+  gulp.task('rebuild', gulpsync.sync(['clean', 'build']));
 
   // by default, it creates zip package for distribution
   gulp.task('default', ['dist']);
