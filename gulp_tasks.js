@@ -165,7 +165,7 @@ module.exports = (gulp, options) => {
   );
 
   gulp.task('writeVersion', ['copyToDist'], callback => {
-    fs.writeFileSync(path.join(distDir, 'ng-rt-version'), new weekOfYear() + '.' + process.env.CI_PIPELINE_ID);
+    fs.writeFileSync(path.join(distDir, 'ng-rt-version'), process.env.CI_PIPELINE_ID);
     callback();
   });
 
