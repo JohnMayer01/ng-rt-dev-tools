@@ -54,6 +54,13 @@ module.exports = (gulp, options) => {
   const browserify = require('browserify');
   const babel = require('babelify');
 
+  var weekOfYear = function(date){
+    var d = new Date(+date);
+    d.setHours(0,0,0);
+    d.setDate(d.getDate()+4-(d.getDay()||7));
+    return Math.ceil((((d-new Date(d.getFullYear(),0,1))/8.64e7)+1)/7);
+  };
+
   gulp.task('buildShared', () => {
     const indexPath = path.join(sharedDir, 'index.js');
 
@@ -158,7 +165,7 @@ module.exports = (gulp, options) => {
   );
 
   gulp.task('writeVersion', ['copyToDist'], callback => {
-    fs.writeFileSync(path.join(distDir, 'ng-rt-version'), process.env.CI_PIPELINE_ID);
+    fs.writeFileSync(path.join(distDir, 'ng-rt-version'), weekOfYear + '.' + process.env.CI_PIPELINE_ID);
     callback();
   });
 
